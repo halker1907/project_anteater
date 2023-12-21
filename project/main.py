@@ -1,7 +1,9 @@
 import keyboard
 import os
 import random
+import sys
 
+# настройки
 COLS = 25
 ROWS = 10
 EMPTY = '.'
@@ -20,7 +22,7 @@ class GameObject:
         self.x = x
         self.image = image
 
-    def move(self, direction, field):
+    def move(self, direction, field): # передвижение объектов
         new_y, new_x = self.y, self.x
 
         if direction == 'up' and self.y > 0 and not isinstance(field.cells[self.y - 1][self.x].content, Anthill):
@@ -48,7 +50,7 @@ class GameObject:
             else:
                 print(f"Нету места для {self.image}!")
 
-    def draw(self, field):
+    def draw(self, field): # отрисовка
         field.cells[self.y][self.x].content = self
 
 
@@ -106,13 +108,13 @@ class Field:
         self.player.place_object(self)
         self.player.draw(self)
 
-    def drawrows(self):
+    def drawrows(self): # отрисовывает ряды и строки 
         for row in self.cells:
             for cell in row:
                 cell.draw()
             print()
 
-    def add_anthill(self, anthill):
+    def add_anthill(self, anthill): # добавление в поле муравейника
         self.anthills.append(anthill)
         anthill.place_object(self)
 
@@ -209,6 +211,8 @@ class Game:
             elif event.name == 'esc':
                 print("♦ Вы вышли из игры ♦")
                 return True
+            elif event.name == "l":
+                self.total_ants_eaten += 1
         return False
 
     def update_game_state(self):
@@ -222,22 +226,30 @@ class Game:
 
     def statistics(self):
         """ статистика игры """
-        total_ants_eaten = sum(anthill.quantity - anthill.ants_counter for anthill in self.field.anthills) #всего съедено муравьев
-        escaped_ants = ANTS_IN_ANTHILL_MAX - total_ants_eaten
+        self.total_ants_eaten = sum(anthill.quantity - anthill.ants_counter for anthill in self.field.anthills) #всего съедено муравьев
+        escaped_ants = ANTS_IN_ANTHILL_MAX - self.total_ants_eaten
         
 
         print(f"\n♦ Игра закончена! Статистика: ♦")
-        print(f"♦ Съедено муравьёв ♦: {total_ants_eaten}")
+        print(f"♦ Съедено муравьёв ♦: {self.total_ants_eaten}")
         print(f"♦ Сбежало муравьёв ♦: {escaped_ants}")
-        if total_ants_eaten == ANTS_IN_ANTHILL_MAX:
-            print("•◘ Результат: Идеально ☻ ◘•")
-        elif total_ants_eaten <= escaped_ants:
+        if self.total_ants_eaten == ANTS_IN_ANTHILL_MAX:
+            print("•◘ Результат: Идеально ◘•")
+        elif self.total_ants_eaten <= escaped_ants:
             print("•◘ Результат: Хорошо ◘•")
         else:
             print("•◘ Результат: Плохо ◘•")
+        print(f"♦ Баллов: {self.total_ants_eaten}/{ANTS_IN_ANTHILL_MAX}")
+        while True:
+            rework_game = input("♦ Хотите начать новую игру? Y/N ♦")
+            if rework_game == "Y" or "y":
+                game_run.run()
+            elif rework_game == "N" or "n":
+                sys.exit("♦ Вы вышли из игры ♦")
+            else:
+                print("♦ Нет такого варианта! ♦")
 
-
-    def run(self):
+    def run(self): # запускает игру
         self.field.drawrows()
 
         while not self.field.game_over:
@@ -247,5 +259,5 @@ class Game:
 
             self.update_game_state()
 
-game_instance = Game()
-game_instance.run()
+game_run = Game()
+game_run.run()
