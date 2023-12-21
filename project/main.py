@@ -211,7 +211,7 @@ class Game:
             elif event.name == 'esc':
                 print("♦ Вы вышли из игры ♦")
                 return True
-            elif event.name == "l":
+            elif event.name == "l" or "k":
                 self.total_ants_eaten += 1
         return False
 
